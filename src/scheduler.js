@@ -1,9 +1,9 @@
-const cron = require('node-cron');
-const { updatePlayers } = require('./jobs/updatePlayersJob');
-const { postLeaderboard } = require('./jobs/leaderboardJob');
-const { GuildSettings } = require('./utils/database');
+import cron from 'node-cron';
+import { updatePlayers } from './jobs/updatePlayersJob.js';
+import { postLeaderboard } from './jobs/leaderboardJob.js';
+import { GuildSettings } from './utils/database.js';
 
-module.exports = (client) => {
+export default (client) => {
   // Schedule leaderboard posting at 00:00 UTC
   cron.schedule('0 0 * * *', async () => {
     await updatePlayers(client, true); // true indicates it's the 00:00 UTC update

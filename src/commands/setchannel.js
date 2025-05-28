@@ -1,19 +1,18 @@
-const { SlashCommandBuilder } = require('discord.js');
-const { GuildSettings } = require('../utils/database');
+import { SlashCommandBuilder } from 'discord.js';
+import { GuildSettings } from '../utils/database.js';
 
-module.exports = {
-  data: new SlashCommandBuilder()
-    .setName('setchannel')
-    .setDescription('Set the leaderboard channel to the current channel.'),
-  async execute(interaction) {
-    const guildId = interaction.guild.id;
-    const channelId = interaction.channel.id;
+export const data = new SlashCommandBuilder()
+  .setName('setchannel')
+  .setDescription('Set the leaderboard channel to the current channel.');
 
-    await GuildSettings.upsert({
-      guildId,
-      leaderboardChannelId: channelId,
-    });
+export async function execute(interaction) {
+  const guildId = interaction.guild.id;
+  const channelId = interaction.channel.id;
 
-    await interaction.reply(`Leaderboard channel set to <#${channelId}>.`);
-  },
-};
+  await GuildSettings.upsert({
+    guildId,
+    leaderboardChannelId: channelId,
+  });
+
+  await interaction.reply(`Leaderboard channel set to <#${channelId}>.`);
+}

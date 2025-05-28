@@ -1,9 +1,15 @@
-const { Sequelize, DataTypes } = require('sequelize');
-const path = require('path');
+import { Sequelize, DataTypes } from 'sequelize';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+// Emulate __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const sequelize = new Sequelize({
   dialect: 'sqlite',
-  storage: path.join(__dirname, '../../database.sqlite'),
+  storage: join(__dirname, '../../database.sqlite'),
   logging: false,
 });
 
@@ -16,4 +22,4 @@ const GuildSettings = sequelize.define('GuildSettings', {
   updateIntervalHours: DataTypes.INTEGER,
 });
 
-module.exports = { sequelize, GuildSettings };
+export { sequelize, GuildSettings };

@@ -1,9 +1,10 @@
-require('dotenv').config();
-const { Client, Collection, GatewayIntentBits } = require('discord.js');
-const fs = require('fs');
-const path = require('path');
-const { sequelize } = require('./utils/database');
-const scheduler = require('./scheduler');
+import 'dotenv/config';
+import { Client, Collection, GatewayIntentBits } from 'discord.js';
+import fs from 'fs';
+import path from 'path';
+import { sequelize } from './utils/database.js';
+import scheduler from './scheduler.js';
+
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
 
