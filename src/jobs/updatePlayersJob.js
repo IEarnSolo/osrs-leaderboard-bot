@@ -1,10 +1,12 @@
-const { WOMClient } = require('@wise-old-man/utils');
-const { GuildSettings } = require('../utils/database');
+import { WOMClient } from '@wise-old-man/utils';
+import { GuildSettings } from '../utils/database.js';
 
 const womClient = new WOMClient();
 
-async function updatePlayers(client, isMidnightUpdate = false, specificGuildId = null) {
-  const guilds = specificGuildId ? [await client.guilds.fetch(specificGuildId)] : client.guilds.cache.values();
+export async function updatePlayers(client, isMidnightUpdate = false, specificGuildId = null) {
+  const guilds = specificGuildId
+    ? [await client.guilds.fetch(specificGuildId)]
+    : client.guilds.cache.values();
 
   for (const guild of guilds) {
     const settings = await GuildSettings.findOne({ where: { guildId: guild.id } });
@@ -24,5 +26,3 @@ async function updatePlayers(client, isMidnightUpdate = false, specificGuildId =
     }
   }
 }
-
-module.exports = { updatePlayers };

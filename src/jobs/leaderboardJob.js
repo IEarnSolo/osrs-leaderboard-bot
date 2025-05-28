@@ -1,9 +1,9 @@
-const { WOMClient } = require('@wise-old-man/utils');
-const { GuildSettings } = require('../utils/database');
+import { WOMClient } from '@wise-old-man/utils';
+import { GuildSettings } from '../utils/database.js';
 
 const womClient = new WOMClient();
 
-async function postLeaderboard(client) {
+export async function postLeaderboard(client) {
   for (const guild of client.guilds.cache.values()) {
     const settings = await GuildSettings.findOne({ where: { guildId: guild.id } });
     if (!settings || !settings.leaderboardChannelId) continue;
@@ -39,5 +39,3 @@ async function postLeaderboard(client) {
     await channel.send(message);
   }
 }
-
-module.exports = { postLeaderboard };
