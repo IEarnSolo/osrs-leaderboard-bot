@@ -3,10 +3,10 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "deploy": "node src/deploy-commands.js",
-    "deploy:dev": "node src/deploy-commands.js --dev",
-    "deploy:clear": "node src/deploy-commands.js --clear",
-    "deploy:dev:clear": "node src/deploy-commands.js --dev --clear"
+    "deploy": "node deploy-commands.js",
+    "deploy:dev": "node deploy-commands.js --dev",
+    "deploy:clear": "node deploy-commands.js --clear",
+    "deploy:dev:clear": "node deploy-commands.js --dev --clear"
   },
   "name": "osrs-leaderboard-bot",
   "version": "1.0.0",
