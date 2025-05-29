@@ -17,6 +17,7 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
     if (!settings) continue;
 
     await guild.roles.fetch();
+    await guild.members.fetch();
 
     const leaderboardRole = guild.roles.cache.find(role => role.name === 'Leaderboard');
     if (!leaderboardRole) continue;
