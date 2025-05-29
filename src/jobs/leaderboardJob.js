@@ -3,7 +3,7 @@ import { GuildSettings } from '../utils/database.js';
 import 'dotenv/config';
 
 const womClient = new WOMClient({
-  apiKey: process.env.WOM_API_KEY
+  apiKey: process.env.WOM_API_KEY,
   userAgent: 'iearnsolo'
 });
 
