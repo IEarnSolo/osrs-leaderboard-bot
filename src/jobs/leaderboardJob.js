@@ -1,7 +1,11 @@
 import { WOMClient } from '@wise-old-man/utils';
 import { GuildSettings } from '../utils/database.js';
+import 'dotenv/config';
 
-const womClient = new WOMClient();
+const womClient = new WOMClient({
+  apiKey: process.env.WOM_API_KEY
+  userAgent: 'iearnsolo'
+});
 
 export async function postLeaderboard(client) {
   for (const guild of client.guilds.cache.values()) {
