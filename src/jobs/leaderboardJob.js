@@ -30,15 +30,15 @@ export async function postLeaderboard(client) {
 
       const groupPlayers = groupGainsResponse?.data?.players || [];
 
-      // Filter by members with the leaderboard role
-      const leaderboardMembersUsernames = new Set(
-        leaderboardRole.members.map(member => (member.nickname || member.displayName || member.user.username).toLowerCase())
-      );
+        const leaderboardMembersUsernames = new Set(
+          leaderboardRole.members.map(member =>
+            (member.nickname || member.displayName || member.user.username).toLowerCase()
+          )
+        );
 
-      // Match players to leaderboard members, case-insensitive
-      const filteredPlayers = groupPlayers.filter(player =>
-        leaderboardMembersUsernames.has(player.username.toLowerCase())
-      );
+        const filteredPlayers = groupPlayers.filter(entry =>
+          leaderboardMembersUsernames.has(entry.player.username.toLowerCase())
+        );
 
       console.log('groupGainsResponse:', groupGainsResponse);
       console.log('Discord Leaderboard Members:', Array.from(leaderboardMembersUsernames));
@@ -46,13 +46,13 @@ export async function postLeaderboard(client) {
 
 
       // Sort by gained XP desc
-      filteredPlayers.sort((a, b) => b.gained - a.gained);
+      filteredPlayers.sort((a, b) => b.data.gained - a.data.gained);
 
       const top10 = filteredPlayers.slice(0, 10);
 
       let message = '__**Top 10 Overall XP Gains (Last Day):**__\n\n';
       top10.forEach((entry, index) => {
-        message += `**${index + 1}.** ${entry.username} - ${entry.gained.toLocaleString()} XP\n`;
+        message += `**${index + 1}.** ${entry.player.username} - ${entry.data.gained.toLocaleString()} XP\n`;
       });
 
       await channel.send(message);
