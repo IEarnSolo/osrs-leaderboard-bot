@@ -28,7 +28,7 @@ export async function postLeaderboard(client) {
       { limit: 40 }
       );
 
-      const groupPlayers = groupGainsResponse?.data?.players || [];
+      const groupPlayers = groupGainsResponse || [];
 
         const leaderboardMembersUsernames = new Set(
           leaderboardRole.members.map(member =>
