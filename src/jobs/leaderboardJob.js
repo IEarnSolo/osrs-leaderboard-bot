@@ -1,5 +1,6 @@
 import { WOMClient, Period, Metric } from '@wise-old-man/utils';
 import { GuildSettings } from '../utils/database.js';
+import { EmbedBuilder } from 'discord.js';
 import 'dotenv/config';
 
 const womClient = new WOMClient({
@@ -50,12 +51,22 @@ export async function postLeaderboard(client) {
 
       const top10 = filteredPlayers.slice(0, 10);
 
-      let message = '__**Top 10 Overall XP Gains (Last Day):**__\n\n';
+      const embed = new EmbedBuilder()
+        .setTitle('🏆 Top 10 Overall XP Gains (Last Day)')
+        .setColor(0xFFD700) // Gold color
+        .setTimestamp()
+        //.setFooter({ text: 'Powered by Wise Old Man' });
+
       top10.forEach((entry, index) => {
-        message += `**${index + 1}.** ${entry.player.displayName} - ${entry.data.gained.toLocaleString()} XP\n`;
+        embed.addFields({
+          name: `${index + 1}. ${entry.player.displayName}`,
+          value: `${entry.data.gained.toLocaleString()} XP`,
+          inline: false
+        });
       });
 
-      await channel.send(message);
+      await channel.send({ embeds: [embed] });
+
 
     } catch (error) {
       console.error(`Failed to fetch or post leaderboard for guild ${guild.id}:`, error);
