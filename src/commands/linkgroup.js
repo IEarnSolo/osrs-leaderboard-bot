@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { GuildSettings } from '../models/GuildSettings.js'; // Adjust path as needed
+import { GuildSettings } from '../utils/GuildSettings.js'; // Adjust path as needed
 
 export default {
   data: new SlashCommandBuilder()
