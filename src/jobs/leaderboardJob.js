@@ -23,10 +23,9 @@ export async function postLeaderboard(client) {
 
     try {
       // Fetch top 40 group gains
-      const groupGainsResponse = await womClient.groups.getGroupGains(settings.groupId, {
-        metric: 'overall',
-        period: 'day',
-        limit: 40,
+      const groupGainsResponse = await womClient.groups.getGroupGains(settings.groupId,
+      { period: Period.DAY, metric: Metric.OVERALL },
+      { limit: 40 }
       });
 
       const groupPlayers = groupGainsResponse?.data?.players || [];
