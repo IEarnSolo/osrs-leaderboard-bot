@@ -52,7 +52,7 @@ export async function postLeaderboard(client) {
 
       let message = '__**Top 10 Overall XP Gains (Last Day):**__\n\n';
       top10.forEach((entry, index) => {
-        message += `**${index + 1}.** ${entry.player.username} - ${entry.data.gained.toLocaleString()} XP\n`;
+        message += `**${index + 1}.** ${entry.player.displayName} - ${entry.data.gained.toLocaleString()} XP\n`;
       });
 
       await channel.send(message);
