@@ -36,6 +36,7 @@ export default (client) => {
             console.log(`🔄 Updating guild ${setting.guildId} (last updated ${hoursSinceUpdate.toFixed(2)}h ago)`);
 
             setting.updatedAt = new Date();
+            setting.changed('updatedAt', true);
             await setting.save();
 
             await updatePlayers(client, false, setting.guildId);
