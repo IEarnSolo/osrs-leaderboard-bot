@@ -28,7 +28,7 @@ export async function postLeaderboard(client) {
       { limit: 40 }
       );
 
-      const groupPlayers = groupGainsResponse?.data?.player || [];
+      const groupPlayers = groupGainsResponse?.data?.players || [];
 
       // Filter by members with the leaderboard role
       const leaderboardMembersUsernames = new Set(
@@ -40,6 +40,7 @@ export async function postLeaderboard(client) {
         leaderboardMembersUsernames.has(player.username.toLowerCase())
       );
 
+      console.log('groupGainsResponse:', groupGainsResponse);
       console.log('Discord Leaderboard Members:', Array.from(leaderboardMembersUsernames));
       console.log('WOM Group Players:', groupPlayers.map(p => p.username));
 
