@@ -16,6 +16,7 @@ export async function postLeaderboard(client) {
     if (!channel) continue;
 
     await guild.roles.fetch();
+    await guild.members.fetch();
 
     const leaderboardRole = guild.roles.cache.find(role => role.name === 'Leaderboard');
     if (!leaderboardRole) continue;
