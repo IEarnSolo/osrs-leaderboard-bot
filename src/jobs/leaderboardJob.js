@@ -40,6 +40,10 @@ export async function postLeaderboard(client) {
         leaderboardMembersUsernames.has(player.username.toLowerCase())
       );
 
+      console.log('Discord Leaderboard Members:', Array.from(leaderboardMembersUsernames));
+      console.log('WOM Group Players:', groupPlayers.map(p => p.username));
+
+
       // Sort by gained XP desc
       filteredPlayers.sort((a, b) => b.gained - a.gained);
 
