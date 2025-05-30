@@ -53,17 +53,25 @@ export async function postLeaderboard(client) {
 
       const embed = new EmbedBuilder()
         .setTitle('🏆 Top 10 Overall XP Gains (Last Day)')
-        .setColor(0xFFD700) // Gold color
+        .setColor(0xFFD700)
         .setTimestamp()
         //.setFooter({ text: 'Powered by Wise Old Man' });
 
-      top10.forEach((entry, index) => {
-        embed.addFields({
-          name: `${index + 1}. ${entry.player.displayName}`,
-          value: `${entry.data.gained.toLocaleString()} XP`,
-          inline: false
-        });
-      });
+      const names = top10
+        .map((entry, index) => {
+          const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+          return `${medal} ${entry.player.displayName}`;
+        })
+        .join('\n');
+
+      const xpValues = top10
+        .map(entry => `${entry.data.gained.toLocaleString()} XP`)
+        .join('\n');
+
+      embed.addFields(
+        { name: 'Player', value: names, inline: true },
+        { name: 'Gained XP', value: xpValues, inline: true }
+      );
 
       await channel.send({ embeds: [embed] });
 
