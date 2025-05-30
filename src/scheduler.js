@@ -15,15 +15,14 @@ export default (client) => {
     let isUpdating = false;
 
     cron.schedule('* * * * *', async () => {
-      if (isUpdating) return;
+      const now = new Date();
+      const currentHour = now.getUTCHours();
+      if (currentHour === 0) return; // Skip 00:00 UTC for leaderboards
 
+      if (isUpdating) return;
       isUpdating = true;
 
       try {
-        const now = new Date();
-        const currentHour = now.getUTCHours();
-        if (currentHour === 0) return; // Skip 00:00 UTC for leaderboards
-
         const settings = await GuildSettings.findAll();
         const sortedSettings = settings
           .filter(s => s.updateIntervalHours)
@@ -40,7 +39,6 @@ export default (client) => {
             await setting.save();
 
             await updatePlayers(client, false, setting.guildId);
-
             break; // Only update 1 guild per minute
           }
         }
