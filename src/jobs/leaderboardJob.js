@@ -26,7 +26,7 @@ export async function postLeaderboard(client) {
       const groupGainsResponse = await womClient.groups.getGroupGains(settings.groupId,
       { period: Period.DAY, metric: Metric.OVERALL },
       { limit: 40 }
-      });
+      );
 
       const groupPlayers = groupGainsResponse?.data?.players || [];
 
