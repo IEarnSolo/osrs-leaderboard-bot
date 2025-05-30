@@ -13,15 +13,23 @@ export default (client) => {
   });
 
   // Schedule player updates based on each guild's interval
-  setInterval(async () => {
-    const settings = await GuildSettings.findAll();
-    const now = new Date();
-    const currentHour = now.getUTCHours();
+    cron.schedule('*/10 * * * *', async () => {
+      const now = new Date();
+      const currentHour = now.getUTCHours();
+      if (currentHour === 0) return; // Still skip midnight UTC for leaderboards
 
-    for (const setting of settings) {
-      if (setting.updateIntervalHours && currentHour % setting.updateIntervalHours === 0 && currentHour !== 0) {
-        await updatePlayers(client, false, setting.guildId);
+      const settings = await GuildSettings.findAll();
+
+      for (const setting of settings) {
+        const lastUpdated = new Date(setting.updatedAt);
+        const hoursSinceUpdate = (now - lastUpdated) / (1000 * 60 * 60);
+
+        if (setting.updateIntervalHours && hoursSinceUpdate >= setting.updateIntervalHours) {
+          console.log(`🔄 Updating guild ${setting.guildId} (last updated ${hoursSinceUpdate.toFixed(2)}h ago)`);
+          await updatePlayers(client, false, setting.guildId);
+          await setting.save(); // Will update `updatedAt`
+        }
       }
-    }
-  }, 60 * 60 * 1000); // Check every hour
+    });
+
 };
