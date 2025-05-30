@@ -35,10 +35,10 @@ export default (client) => {
           if (hoursSinceUpdate >= setting.updateIntervalHours) {
             console.log(`🔄 Updating guild ${setting.guildId} (last updated ${hoursSinceUpdate.toFixed(2)}h ago)`);
 
-            await updatePlayers(client, false, setting.guildId);
             setting.updatedAt = new Date();
             await setting.save();
 
+            await updatePlayers(client, false, setting.guildId);
 
             break; // Only update 1 guild per minute
           }
