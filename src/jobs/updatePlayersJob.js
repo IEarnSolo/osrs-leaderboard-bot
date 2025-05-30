@@ -34,17 +34,19 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
           success = true;
           break;
         } catch (error) {
+          const status = error?.response?.status;
+          const message = error?.response?.data?.message || error.message;
+
           if (attempt < 4) {
-            console.warn(`[Update] Failed to update player ${username} (Attempt ${attempt}/4). Retrying in 10 seconds...`);
+            console.warn(`[Update] Failed to update player ${username} (Attempt ${attempt}/4). Status: ${status || 'N/A'} | Message: ${message}. Retrying in 10 seconds...`);
             await new Promise(res => setTimeout(res, 10000));
           } else {
-            console.error(`[Update] Failed to update player ${username} after 4 attempts. Skipping.`);
+            console.error(`[Update] Failed to update player ${username} after 4 attempts. Status: ${status || 'N/A'} | Message: ${message}. Skipping.`);
           }
         }
       }
 
-      // Respect rate limits regardless of success/failure
-      await new Promise(res => setTimeout(res, 3000));
+      await new Promise(res => setTimeout(res, 3000)); // Rate limit delay
     }
   }
 }
