@@ -1,4 +1,4 @@
-import { WOMClient } from '@wise-old-man/utils';
+import { WOMClient, Period, Metric } from '@wise-old-man/utils';
 import { GuildSettings } from '../utils/database.js';
 import 'dotenv/config';
 
