@@ -10,7 +10,7 @@ const womClient = new WOMClient({
 export async function postLeaderboard(client) {
   for (const guild of client.guilds.cache.values()) {
     const settings = await GuildSettings.findOne({ where: { guildId: guild.id } });
-    if (!settings || !settings.leaderboardChannelId) continue;
+    if (!settings || !settings.leaderboardChannelId || !settings.groupId) continue;
 
     const channel = guild.channels.cache.get(settings.leaderboardChannelId);
     if (!channel) continue;
@@ -21,28 +21,40 @@ export async function postLeaderboard(client) {
     const leaderboardRole = guild.roles.cache.find(role => role.name === 'Leaderboard');
     if (!leaderboardRole) continue;
 
-    const leaderboard = [];
+    try {
+      // Fetch top 40 group gains
+      const groupGainsResponse = await womClient.groups.getGroupGains(settings.groupId, {
+        metric: 'overall',
+        period: 'day',
+        limit: 40,
+      });
 
-    for (const member of leaderboardRole.members.values()) {
-      const username = member.nickname || member.displayName || member.user.username;
-      try {
-        const data = await womClient.players.getPlayerGains(username, { period: 'day' });
-        const xp = data?.data?.skills?.overall?.experience?.gained || 0;
-        leaderboard.push({ username, xp });
-        await new Promise(res => setTimeout(res, 3000)); // Delay to respect rate limits
-      } catch (error) {
-        console.error(`Error fetching gains for ${username}:`, error);
-      }
+      const groupPlayers = groupGainsResponse?.data?.players || [];
+
+      // Filter by members with the leaderboard role
+      const leaderboardMembersUsernames = new Set(
+        leaderboardRole.members.map(member => (member.nickname || member.displayName || member.user.username).toLowerCase())
+      );
+
+      // Match players to leaderboard members, case-insensitive
+      const filteredPlayers = groupPlayers.filter(player =>
+        leaderboardMembersUsernames.has(player.username.toLowerCase())
+      );
+
+      // Sort by gained XP desc
+      filteredPlayers.sort((a, b) => b.gained - a.gained);
+
+      const top10 = filteredPlayers.slice(0, 10);
+
+      let message = '__**Top 10 Overall XP Gains (Last Day):**__\n\n';
+      top10.forEach((entry, index) => {
+        message += `**${index + 1}.** ${entry.username} - ${entry.gained.toLocaleString()} XP\n`;
+      });
+
+      await channel.send(message);
+
+    } catch (error) {
+      console.error(`Failed to fetch or post leaderboard for guild ${guild.id}:`, error);
     }
-
-    leaderboard.sort((a, b) => b.xp - a.xp);
-    const top10 = leaderboard.slice(0, 10);
-
-    let message = '__**Top 10 Overall XP Gains (Last Day):**__\n\n';
-    top10.forEach((entry, index) => {
-      message += `**${index + 1}.** ${entry.username} - ${entry.xp.toLocaleString()} XP\n`;
-    });
-
-    await channel.send(message);
   }
 }

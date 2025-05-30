@@ -20,9 +20,14 @@ const GuildSettings = sequelize.define('GuildSettings', {
   },
   leaderboardChannelId: DataTypes.STRING,
   updateIntervalHours: DataTypes.INTEGER,
+  groupId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 }, {
   timestamps: true,
 });
+
 
 
 export { sequelize, GuildSettings };
