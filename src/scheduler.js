@@ -12,25 +12,41 @@ export default (client) => {
     timezone: 'UTC',
   });
 
-  // Schedule player updates based on each guild's interval
-    cron.schedule('*/10 * * * *', async () => {
-      const now = new Date();
-      const currentHour = now.getUTCHours();
-      if (currentHour === 0) return; // Still skip midnight UTC for leaderboards
+    let isUpdating = false;
 
-      const settings = await GuildSettings.findAll();
+    cron.schedule('* * * * *', async () => {
+      if (isUpdating) return;
 
-      for (const setting of settings) {
-        const lastUpdated = new Date(setting.updatedAt);
-        const hoursSinceUpdate = (now - lastUpdated) / (1000 * 60 * 60);
+      isUpdating = true;
 
-        if (setting.updateIntervalHours && hoursSinceUpdate >= setting.updateIntervalHours) {
-          console.log(`🔄 Updating guild ${setting.guildId} (last updated ${hoursSinceUpdate.toFixed(2)}h ago)`);
-          await updatePlayers(client, false, setting.guildId);
-          setting.updatedAt = new Date();
-          await setting.save();
+      try {
+        const now = new Date();
+        const currentHour = now.getUTCHours();
+        if (currentHour === 0) return; // Skip 00:00 UTC for leaderboards
+
+        const settings = await GuildSettings.findAll();
+        const sortedSettings = settings
+          .filter(s => s.updateIntervalHours)
+          .sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt));
+
+        for (const setting of sortedSettings) {
+          const hoursSinceUpdate = (now - new Date(setting.updatedAt)) / (1000 * 60 * 60);
+
+          if (hoursSinceUpdate >= setting.updateIntervalHours) {
+            console.log(`🔄 Updating guild ${setting.guildId} (last updated ${hoursSinceUpdate.toFixed(2)}h ago)`);
+
+            await updatePlayers(client, false, setting.guildId);
+            setting.updatedAt = new Date();
+            await setting.save();
+
+
+            break; // Only update 1 guild per minute
+          }
         }
+      } catch (error) {
+        console.error('Error during scheduled update:', error);
+      } finally {
+        isUpdating = false;
       }
     });
-
 };
