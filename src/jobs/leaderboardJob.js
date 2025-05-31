@@ -8,6 +8,27 @@ const womClient = new WOMClient({
   userAgent: 'iearnsolo'
 });
 
+export async function sendLeaderboardReminder(client) {
+  for (const guild of client.guilds.cache.values()) {
+    const settings = await GuildSettings.findOne({ where: { guildId: guild.id } });
+    if (!settings || !settings.leaderboardChannelId) continue;
+
+    const channel = guild.channels.cache.get(settings.leaderboardChannelId);
+    if (!channel) continue;
+
+    await guild.roles.fetch();
+    const leaderboardRole = guild.roles.cache.find(role => role.name === 'Leaderboard');
+    if (!leaderboardRole) continue;
+
+    try {
+      await channel.send(`<@&${leaderboardRole.id}> The daily leaderboard will be posted shortly. Please log out if you want your XP updated.`);
+      console.log(`[Reminder] Sent daily leaderboard reminder in guild ${guild.name}`);
+    } catch (error) {
+      console.error(`[Reminder] Failed to send reminder in guild ${guild.name}:`, error);
+    }
+  }
+}
+
 export async function postLeaderboard(client) {
   for (const guild of client.guilds.cache.values()) {
     const settings = await GuildSettings.findOne({ where: { guildId: guild.id } });
@@ -41,9 +62,9 @@ export async function postLeaderboard(client) {
           leaderboardMembersUsernames.has(entry.player.username.toLowerCase())
         );
 
-      console.log('groupGainsResponse:', groupGainsResponse);
+      /*console.log('groupGainsResponse:', groupGainsResponse);
       console.log('Discord Leaderboard Members:', Array.from(leaderboardMembersUsernames));
-      console.log('WOM Group Players:', groupPlayers.map(p => p.username));
+      console.log('WOM Group Players:', groupPlayers.map(p => p.username));*/
 
 
       // Sort by gained XP desc

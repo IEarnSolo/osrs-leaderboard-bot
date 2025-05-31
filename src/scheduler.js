@@ -1,9 +1,17 @@
 import cron from 'node-cron';
 import { updatePlayers } from './jobs/updatePlayersJob.js';
+import { sendLeaderboardReminder } from './jobs/leaderboardJob.js';
 import { postLeaderboard } from './jobs/leaderboardJob.js';
 import { GuildSettings } from './utils/database.js';
 
 export default (client) => {
+
+  cron.schedule('32 8 * * *', () => {
+    sendLeaderboardReminder(client);
+  }, {
+    timezone: 'UTC'
+  });
+
   // Schedule leaderboard posting at 00:00 UTC
   cron.schedule('0 0 * * *', async () => {
     await updatePlayers(client, true); // true indicates it's the 00:00 UTC update
