@@ -64,7 +64,7 @@ export async function postLeaderboard(client) {
         .join('\n');
 
       embed.addFields({
-        name: '\u200B', // Invisible name to keep a clean look
+        //name: '\u200B', // Invisible name to keep a clean look
         value: leaderboardText,
       });
 
