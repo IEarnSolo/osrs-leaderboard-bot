@@ -52,21 +52,17 @@ export async function postLeaderboard(client) {
       const top10 = filteredPlayers.slice(0, 10);
 
       const embed = new EmbedBuilder()
-        .setTitle('🏆 Top 10 Overall XP Gains (Last Day)')
+        .setTitle('🏆 Top 10 Overall XP Gains (Past 24h)')
         .setColor(0xFFD700)
-        .setTimestamp()
-        .setFooter({ text: 'Powered by Wise Old Man' });
-
-      const leaderboardText = top10
-        .map((entry, index) => {
-          return `**${index + 1}.** ${entry.player.displayName} — ${entry.data.gained.toLocaleString()} XP`;
-        })
-        .join('\n');
-
-      embed.addFields({
-        //name: '\u200B', // Invisible name to keep a clean look
-        value: leaderboardText,
-      });
+        //.setTimestamp()
+        //.setFooter({ text: 'Powered by Wise Old Man' })
+        .setDescription(
+          top10
+            .map((entry, index) => {
+              return `**${index + 1}.** ${entry.player.displayName} — ${entry.data.gained.toLocaleString()} XP`;
+            })
+            .join('\n')
+        );
 
       await channel.send({ embeds: [embed] });
 
