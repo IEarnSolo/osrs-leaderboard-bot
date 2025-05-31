@@ -6,7 +6,7 @@ import { GuildSettings } from './utils/database.js';
 
 export default (client) => {
 
-  cron.schedule('32 8 * * *', () => {
+  cron.schedule('55 23 * * *', () => {
     sendLeaderboardReminder(client);
   }, {
     timezone: 'UTC'
