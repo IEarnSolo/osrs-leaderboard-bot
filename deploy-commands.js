@@ -21,7 +21,10 @@ const rest = new REST({ version: '10' }).setToken(DISCORD_TOKEN);
 // Load command files unless clearing
 const commands = [];
 if (!isClear) {
-  const commandsPath = path.join(__dirname, 'src', 'commands');
+  const commandsDir = path.join(__dirname, 'src', 'commands');
+  const folder = isDev ? 'dev' : 'global';
+  const commandsPath = path.join(commandsDir, folder);
+
   const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
   for (const file of commandFiles) {

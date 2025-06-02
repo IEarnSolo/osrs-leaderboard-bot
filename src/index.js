@@ -14,11 +14,18 @@ const __dirname = path.dirname(__filename);
 client.commands = new Collection();
 
 const commandsPath = path.join(__dirname, 'commands');
-const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+const commandFolders = fs.readdirSync(commandsPath);
 
-for (const file of commandFiles) {
-  const { default: command } = await import(path.join(commandsPath, file));
-  client.commands.set(command.data.name, command);
+for (const folder of commandFolders) {
+  const folderPath = path.join(commandsPath, folder);
+  const commandFiles = fs.readdirSync(folderPath).filter(file => file.endsWith('.js'));
+
+  for (const file of commandFiles) {
+    const { default: command } = await import(path.join(folderPath, file));
+    if (command && command.data && command.data.name) {
+      client.commands.set(command.data.name, command);
+    }
+  }
 }
 
 client.once('ready', async () => {
