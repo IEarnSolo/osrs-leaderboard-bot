@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { postLeaderboard } from '../jobs/leaderboardJob.js';
+import { postLeaderboard } from '../../jobs/leaderboardJob.js';
 
 export default {
   data: new SlashCommandBuilder()
