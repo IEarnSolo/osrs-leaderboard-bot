@@ -34,16 +34,17 @@ export default (client) => {
         const settings = await GuildSettings.findAll();
         const sortedSettings = settings
           .filter(s => s.updateIntervalHours)
-          .sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt));
+          .sort((a, b) => new Date(a.lastPlayerUpdate) - new Date(b.lastPlayerUpdate));
 
         for (const setting of sortedSettings) {
-          const hoursSinceUpdate = (now - new Date(setting.updatedAt)) / (1000 * 60 * 60);
+          const lastUpdate = setting.lastPlayerUpdate || new Date(0);
+          const hoursSinceUpdate = (now - new Date(lastUpdate)) / (1000 * 60 * 60);
 
           if (hoursSinceUpdate >= setting.updateIntervalHours) {
             console.log(`🔄 Updating guild ${setting.guildId} (last updated ${hoursSinceUpdate.toFixed(2)}h ago)`);
 
-            setting.updatedAt = new Date();
-            setting.changed('updatedAt', true);
+            setting.lastPlayerUpdate = new Date();
+            setting.changed('lastPlayerUpdate', true);
             await setting.save();
 
             await updatePlayers(client, false, setting.guildId);

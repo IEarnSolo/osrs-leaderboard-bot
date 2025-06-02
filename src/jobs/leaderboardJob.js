@@ -29,43 +29,47 @@ export async function sendLeaderboardReminder(client) {
   }
 }
 
-export async function postLeaderboard(client) {
-  for (const guild of client.guilds.cache.values()) {
-    const settings = await GuildSettings.findOne({ where: { guildId: guild.id } });
-    if (!settings || !settings.leaderboardChannelId || !settings.groupId) continue;
+export async function postLeaderboard(client, channel = null) {
+  // If a specific channel is provided (e.g., from a slash command), infer the guild from it
+  if (channel) {
+    const guild = channel.guild;
 
-    const channel = guild.channels.cache.get(settings.leaderboardChannelId);
-    if (!channel) continue;
+    const settings = await GuildSettings.findOne({ where: { guildId: guild.id } });
+    if (!settings || !settings.groupId) return;
 
     await guild.roles.fetch();
     await guild.members.fetch();
 
     const leaderboardRole = guild.roles.cache.find(role => role.name === 'Leaderboard');
-    if (!leaderboardRole) continue;
+    if (!leaderboardRole) return;
 
     try {
       // Fetch top 40 group gains
-      const groupGainsResponse = await womClient.groups.getGroupGains(settings.groupId,
-      { period: Period.DAY, metric: Metric.OVERALL },
-      { limit: 40 }
+      const groupGainsResponse = await womClient.groups.getGroupGains(
+        settings.groupId,
+        { period: Period.DAY, metric: Metric.OVERALL },
+        { limit: 40 }
       );
 
       const groupPlayers = groupGainsResponse || [];
 
-        const leaderboardMembersUsernames = new Set(
-          leaderboardRole.members.map(member =>
-            (member.nickname || member.displayName || member.user.username).toLowerCase()
-          )
-        );
+      const leaderboardMembersUsernames = new Set(
+        leaderboardRole.members.map(member =>
+          (member.nickname || member.displayName || member.user.username)
+            .toLowerCase()
+            .replaceAll(/[_-]/g, ' ')
+        )
+      );
 
-        const filteredPlayers = groupPlayers.filter(entry =>
-          leaderboardMembersUsernames.has(entry.player.username.toLowerCase())
-        );
+      const filteredPlayers = groupPlayers.filter(entry =>
+        leaderboardMembersUsernames.has(
+          entry.player.username.toLowerCase().replaceAll(/[_-]/g, ' ')
+        )
+      );
 
       /*console.log('groupGainsResponse:', groupGainsResponse);
       console.log('Discord Leaderboard Members:', Array.from(leaderboardMembersUsernames));
       console.log('WOM Group Players:', groupPlayers.map(p => p.username));*/
-
 
       // Sort by gained XP desc
       filteredPlayers.sort((a, b) => b.data.gained - a.data.gained);
@@ -87,9 +91,21 @@ export async function postLeaderboard(client) {
 
       await channel.send({ embeds: [embed] });
 
-
     } catch (error) {
-      console.error(`Failed to fetch or post leaderboard for guild ${guild.id}:`, error);
+      console.error(`Failed to post leaderboard in command channel for guild ${guild.id}:`, error);
     }
+
+    return; // Don't continue to the full guild loop
+  }
+
+  // Loop through all guilds if no specific channel was provided
+  for (const guild of client.guilds.cache.values()) {
+    const settings = await GuildSettings.findOne({ where: { guildId: guild.id } });
+    if (!settings || !settings.leaderboardChannelId || !settings.groupId) continue;
+
+    const channel = guild.channels.cache.get(settings.leaderboardChannelId);
+    if (!channel) continue;
+
+    await postLeaderboard(client, channel);
   }
 }

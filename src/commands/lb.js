@@ -10,7 +10,7 @@ export default {
     await interaction.deferReply({ ephemeral: true });
 
     try {
-      await postLeaderboard(interaction.client);
+      await postLeaderboard(interaction.client, interaction.channel);
       await interaction.editReply('✅ Leaderboard posted.');
     } catch (err) {
       console.error('Error posting leaderboard:', err);
