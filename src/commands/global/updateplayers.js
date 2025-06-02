@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { GuildSettings } from '../utils/database.js';
+import { GuildSettings } from '../../utils/database.js';
 
 export default {
   data: new SlashCommandBuilder()
