@@ -34,20 +34,6 @@ client.once('ready', async () => {
   console.log(`Logged in as ${client.user.tag}`);
   await sequelize.sync();
   scheduler(client);
-  try {
-          const username = 'I Earn Solo';
-          const player = await womClient.players.getPlayerDetails(username);
-          const updatedAt = player.updatedAt
-            ? new Date(player.updatedAt).toLocaleString('en-US', {
-                timeZone: process.env.TIMEZONE || 'UTC',
-                hour12: true
-              })
-            : 'Never';
-
-          console.log(`- ${username}: last updated at ${updatedAt}`);
-        } catch (error) {
-          console.error(`Failed to fetch updatedAt for ${username}:`, error.message);
-        }
 });
 
 client.on('interactionCreate', async interaction => {
