@@ -37,7 +37,7 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
           success = true;
           break;
         } catch (error) {
-          const status = error?.response?.status || error.response.status;
+          const status = error?.response?.status || error?.status
           const message = error?.response?.data?.message || error.message;
 
           if (attempt < 4) {
