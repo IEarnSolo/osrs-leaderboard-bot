@@ -90,6 +90,7 @@ export async function postLeaderboard(client, channel = null) {
         );
 
       await channel.send({ embeds: [embed] });
+      console.log(`[Leaderboard] Posted leaderboard in guild ${guild.name}`);
 
     } catch (error) {
       console.error(`Failed to post leaderboard in command channel for guild ${guild.id}:`, error);

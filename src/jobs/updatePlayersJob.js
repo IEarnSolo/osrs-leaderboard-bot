@@ -9,6 +9,7 @@ const womClient = new WOMClient({
 
 export async function updatePlayers(client, isMidnightUpdate = false, specificGuildId = null) {
   const startTime = Date.now();
+  const failedPlayers = [];
 
   const guilds = specificGuildId
     ? [await client.guilds.fetch(specificGuildId)]
@@ -40,10 +41,11 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
           const message = error?.response?.data?.message || error.message;
 
           if (attempt < 4) {
-            console.warn(`[Update] Failed to update player ${username} (Attempt ${attempt}/4). Status: ${status || 'N/A'} | Message: ${message}. Retrying in 10 seconds...`);
+            console.warn(`[Update] Failed to update player ${username} (Attempt ${attempt}/4). Status: ${status || 'N/A'} | Message: ${message}. Retrying in 5 seconds...`);
             await new Promise(res => setTimeout(res, 5000));
           } else {
             console.error(`[Update] Failed to update player ${username} after 4 attempts. Status: ${status || 'N/A'} | Message: ${message}. Skipping.`);
+            failedPlayers.push(username);
           }
         }
       }
@@ -61,4 +63,28 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
       : `${Math.floor(durationSec / 60)}m ${Math.round(durationSec % 60)}s`;
 
   console.log(`[Update] Finished all player updates in ${durationStr}.`);
+
+  if (failedPlayers.length > 0) {
+    console.log(`[Update] ${failedPlayers.length} players failed to update. Fetching latest update times...`);
+
+    for (const username of failedPlayers) {
+      try {
+        const player = await womClient.players.getPlayerDetails(username);
+        const updatedAt = player.updatedAt
+          ? new Date(player.updatedAt).toLocaleString('en-US', {
+              timeZone: process.env.TIMEZONE || 'UTC',
+              hour12: true
+            })
+          : 'Never';
+
+        console.log(`- ${username}: last updated at ${updatedAt}`);
+      } catch (error) {
+        console.error(`Failed to fetch updatedAt for ${username}:`, error.message);
+      }
+
+      await new Promise(res => setTimeout(res, 500));
+    }
+  } else {
+    console.log('[Update] No failed players to report.');
+  }
 }
