@@ -1,12 +1,8 @@
-import { WOMClient, Period, Metric } from '@wise-old-man/utils';
+import { Period, Metric } from '@wise-old-man/utils';
+import { womClient } from '../utils/womClient.js';
 import { GuildSettings } from '../utils/database.js';
 import { EmbedBuilder } from 'discord.js';
 import 'dotenv/config';
-
-const womClient = new WOMClient({
-  apiKey: process.env.WOM_API_KEY,
-  userAgent: 'iearnsolo'
-});
 
 export async function sendLeaderboardReminder(client) {
   for (const guild of client.guilds.cache.values()) {
