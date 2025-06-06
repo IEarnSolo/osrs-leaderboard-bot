@@ -6,7 +6,7 @@ dotenv.config();
 const timeZone = process.env.TIMEZONE || 'UTC';
 
 function getTimestamp() {
-  return format(new Date(), 'yyyy-MM-dd HH:mm:ss', { timeZone });
+  return formatInTimeZone(new Date(), 'yyyy-MM-dd HH:mm:ss', { timeZone });
 }
 
 const originalLog = console.log;
