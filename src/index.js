@@ -6,6 +6,7 @@ import { Collection } from 'discord.js';
 import { sequelize } from './utils/database.js';
 import scheduler from './scheduler.js';
 import client from './config/client.js';
+import './utils/logger.js';
 
 // Fix for __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
