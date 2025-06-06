@@ -1,4 +1,5 @@
 import { format } from 'date-fns-tz';
+import 'dotenv/config';
 
 const timeZone = process.env.TIMEZONE || 'UTC';
 
