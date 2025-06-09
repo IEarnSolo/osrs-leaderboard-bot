@@ -62,6 +62,8 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
   if (failedPlayers.length > 0) {
     console.log(`[Update] ${failedPlayers.length} players failed to update. Fetching latest update times...`);
 
+    const failedUpdateLogs = [];
+
     for (const username of failedPlayers) {
       try {
         const player = await womClient.players.getPlayerDetails(username);
@@ -72,12 +74,47 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
             })
           : 'Never';
 
-        console.log(`- ${username}: last updated at ${updatedAt}`);
+        const logLine = `- ${username}: last updated at ${updatedAt}`;
+        console.log(logLine);
+        failedUpdateLogs.push(logLine);
       } catch (error) {
-        console.error(`Failed to fetch updatedAt for ${username}:`, error.message);
+        const errorMsg = `Failed to fetch updatedAt for ${username}: ${error.message}`;
+        console.error(errorMsg);
+        failedUpdateLogs.push(`- ${username}: failed to fetch updatedAt`);
       }
 
-      await new Promise(res => setTimeout(res, 500));
+      await new Promise(res => setTimeout(res, 500)); // slight delay for rate-limiting
+    }
+
+    // If UTC time is midnight (00:00), send the list to the Discord channel
+    const utcHour = new Date().getUTCHours();
+    if (utcHour === 0) {
+      try {
+        const channelId = '1292425572433268818';
+        const channel = await client.channels.fetch(channelId);
+
+        if (channel && channel.isTextBased()) {
+          const messageChunks = [];
+
+          let chunk = `🛑 **${failedPlayers.length} Players Failed to Update for leaderboard**\n`;
+          for (const line of failedUpdateLogs) {
+            if ((chunk + line + '\n').length > 1900) {
+              messageChunks.push(chunk);
+              chunk = '';
+            }
+            chunk += line + '\n';
+          }
+          if (chunk.length) messageChunks.push(chunk);
+
+          for (const msg of messageChunks) {
+            await channel.send(msg);
+          }
+        } else {
+          console.warn(`[Update] Could not send failed update list - channel not found or not text-based.`);
+        }
+      } catch (err) {
+        console.error('[Update] Error sending failed update list to Discord:', err);
+      }
     }
   } else {
     console.log('[Update] No failed players to report.');
