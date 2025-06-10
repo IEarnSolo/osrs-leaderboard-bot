@@ -31,22 +31,21 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
       continue;
     }
 
-    const leaderboardMembersUsernames = new Set(
-      leaderboardRole.members.map(member =>
-        (member.nickname || member.displayName || member.user.username)
-          .toLowerCase()
-          .replaceAll(/[_-]/g, ' ')
-      )
+    const leaderboardNameMap = new Map(
+      leaderboardRole.members.map(member => {
+        const discordName = member.nickname || member.displayName || member.user.username;
+        const normalizedName = discordName.toLowerCase().replace(/[_-]/g, ' ');
+        return [normalizedName, discordName];
+      })
     );
 
     const filteredPlayers = groupPlayers.filter(entry =>
-      leaderboardMembersUsernames.has(
-        entry.username.toLowerCase().replaceAll(/[_-]/g, ' ')
-      )
+      leaderboardNameMap.has(entry.username.toLowerCase().replace(/[_-]/g, ' '))
     );
 
     for (const player of filteredPlayers) {
       const username = player.username;
+      const displayName = leaderboardNameMap.get(discordName) || player.username;
 
       const lastChanged = typeof player.lastChangedAt === 'string'
         ? parseISO(player.lastChangedAt)
@@ -85,16 +84,16 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
       }
 
       if (!shouldUpdate) {
-        console.log(`[Update] Skipping ${username} - Last changed: (${formatDistanceToNow(lastChanged)} ago) | Last updated: (${formatDistanceToNow(lastUpdated)} ago)`);
+        console.log(`[Update] Skipping ${displayName} - Last changed: (${formatDistanceToNow(lastChanged)} ago) | Last updated: (${formatDistanceToNow(lastUpdated)} ago)`);
         continue;
       }
 
-      console.log(`[Update] Attempting to update player: ${username}`);
+      console.log(`[Update] Attempting to update player: ${displayName}`);
       let success = false;
       for (let attempt = 1; attempt <= 4; attempt++) {
         try {
           await womClient.players.updatePlayer(username);
-          console.log(`[Update] Successfully updated player: ${username}`);
+          console.log(`[Update] Successfully updated player: ${displayName}`);
           success = true;
           break;
         } catch (error) {
@@ -102,10 +101,10 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
           const message = error?.response?.data?.message || error.message;
 
           if (attempt < 4) {
-            console.warn(`[Update] Failed to update player ${username} (Attempt ${attempt}/4). Status: ${status || 'N/A'} | Message: ${message}. Retrying in 5 seconds...`);
+            console.warn(`[Update] Failed to update player ${displayName} (Attempt ${attempt}/4). Status: ${status || 'N/A'} | Message: ${message}. Retrying in 5 seconds...`);
             await new Promise(res => setTimeout(res, 5000));
           } else {
-            console.error(`[Update] Failed to update player ${username} after 4 attempts. Status: ${status || 'N/A'} | Message: ${message}. Skipping.`);
+            console.error(`[Update] Failed to update player ${displayName} after 4 attempts. Status: ${status || 'N/A'} | Message: ${message}. Skipping.`);
             failedPlayers.push(username);
           }
         }
@@ -133,6 +132,7 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
     for (const username of failedPlayers) {
       try {
         const player = await womClient.players.getPlayerDetails(username);
+        const displayName = leaderboardNameMap.get(discordName) || player.username;
         const updatedAt = player.updatedAt
           ? new Date(player.updatedAt).toLocaleString('en-US', {
               timeZone: process.env.TIMEZONE || 'UTC',
@@ -140,13 +140,13 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
             })
           : 'Never';
 
-        const logLine = `- ${username}: last updated at ${updatedAt}`;
+        const logLine = `- ${displayName}: last updated at ${updatedAt}`;
         console.log(logLine);
         failedUpdateLogs.push(logLine);
       } catch (error) {
-        const errorMsg = `Failed to fetch updatedAt for ${username}: ${error.message}`;
+        const errorMsg = `Failed to fetch updatedAt for ${displayName}: ${error.message}`;
         console.error(errorMsg);
-        failedUpdateLogs.push(`- ${username}: failed to fetch updatedAt`);
+        failedUpdateLogs.push(`- ${displayName}: failed to fetch updatedAt`);
       }
 
       await new Promise(res => setTimeout(res, 500)); // slight delay for rate-limiting
