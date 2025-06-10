@@ -50,6 +50,8 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
 
       const lastChanged = typeof player.lastChangedAt === 'string' ? parseISO(player.lastChangedAt) : null;
       const lastUpdated = typeof player.updatedAt === 'string' ? parseISO(player.updatedAt) : null;
+      console.log(lastChanged);
+      console.log(lastUpdated);
 
       const now = new Date();
       let shouldUpdate = true;
