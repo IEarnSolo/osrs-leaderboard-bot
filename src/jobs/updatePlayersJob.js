@@ -1,6 +1,6 @@
 import { womClient } from '../utils/womClient.js';
 import { GuildSettings } from '../utils/database.js';
-import { parseISO, differenceInDays, differenceInWeeks, differenceInMonths, differenceInYears } from 'date-fns';
+import { parseISO, differenceInDays, differenceInWeeks, differenceInMonths, differenceInYears, formatDistanceToNow } from 'date-fns';
 import 'dotenv/config';
 
 export async function updatePlayers(client, isMidnightUpdate = false, specificGuildId = null) {
@@ -85,11 +85,9 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
       }
 
       if (!shouldUpdate) {
-        console.log(
-        `[Update] Skipping ${username}: does not meet update frequency requirements.\n
-        Last changed: ${lastChanged}\n
-        Last updated: ${lastUpdated}`
-        );
+        console.log(`[Update] Skipping ${username} -
+        Last changed: (${formatDistanceToNow(lastChanged)} ago) |
+        Last updated: (${formatDistanceToNow(lastUpdated)} ago)`);
         continue;
       }
 
