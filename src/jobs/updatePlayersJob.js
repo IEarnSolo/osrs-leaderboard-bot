@@ -88,7 +88,7 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
         console.log(
         `[Update] Skipping ${username}: does not meet update frequency requirements.\n
         Last changed: ${lastChanged}\n
-        Last updated: ${updatedAt}`
+        Last updated: ${lastUpdated}`
         );
         continue;
       }
