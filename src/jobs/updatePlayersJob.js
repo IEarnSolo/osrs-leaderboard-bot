@@ -1,5 +1,6 @@
 import { womClient } from '../utils/womClient.js';
 import { GuildSettings } from '../utils/database.js';
+import { parseISO, differenceInDays, differenceInWeeks, differenceInMonths, differenceInYears } from 'date-fns';
 import 'dotenv/config';
 
 export async function updatePlayers(client, isMidnightUpdate = false, specificGuildId = null) {
@@ -20,10 +21,66 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
     const leaderboardRole = guild.roles.cache.find(role => role.name === 'Leaderboard');
     if (!leaderboardRole) continue;
 
-    for (const member of leaderboardRole.members.values()) {
-      const username = member.nickname || member.displayName || member.user.username;
-      console.log(`[Update] Attempting to update player: ${username}`);
+    // Fetch group details from WOM
+    let groupPlayers = [];
+    try {
+      const groupDetails = await womClient.groups.getGroupDetails(settings.groupId);
+      groupPlayers = groupDetails.memberships.map(m => m.player);
+    } catch (error) {
+      console.error(`[Update] Failed to fetch group details for guild ${guild.name}:`, error.message);
+      continue;
+    }
 
+    const leaderboardMembersUsernames = new Set(
+      leaderboardRole.members.map(member =>
+        (member.nickname || member.displayName || member.user.username)
+          .toLowerCase()
+          .replaceAll(/[_-]/g, ' ')
+      )
+    );
+
+    const filteredPlayers = groupPlayers.filter(entry =>
+      leaderboardMembersUsernames.has(
+        entry.username.toLowerCase().replaceAll(/[_-]/g, ' ')
+      )
+    );
+
+    for (const player of filteredPlayers) {
+      const username = player.username;
+
+      const lastChanged = player.lastChangedAt ? parseISO(player.lastChangedAt) : null;
+      const lastUpdated = player.updatedAt ? parseISO(player.updatedAt) : null;
+
+      const now = new Date();
+      let shouldUpdate = true;
+
+      if (lastChanged && lastUpdated) {
+        const yearsSinceChange = differenceInYears(now, lastChanged);
+        const monthsSinceChange = differenceInMonths(now, lastChanged);
+        const weeksSinceChange = differenceInWeeks(now, lastChanged);
+
+        const daysSinceLastUpdate = differenceInDays(now, lastUpdated);
+        const weeksSinceLastUpdate = differenceInWeeks(now, lastUpdated);
+
+        if (yearsSinceChange >= 1) {
+          shouldUpdate = weeksSinceLastUpdate >= 2;
+        } else if (monthsSinceChange >= 6) {
+          shouldUpdate = weeksSinceLastUpdate >= 1;
+        } else if (monthsSinceChange >= 1) {
+          shouldUpdate = daysSinceLastUpdate >= 5;
+        } else if (weeksSinceChange >= 1) {
+          shouldUpdate = daysSinceLastUpdate >= 1;
+        } else {
+          shouldUpdate = true;
+        }
+      }
+
+      if (!shouldUpdate) {
+        console.log(`[Update] Skipping ${username}: does not meet update frequency requirements.`);
+        continue;
+      }
+
+      console.log(`[Update] Attempting to update player: ${username}`);
       let success = false;
       for (let attempt = 1; attempt <= 4; attempt++) {
         try {
@@ -85,38 +142,38 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
 
       await new Promise(res => setTimeout(res, 500)); // slight delay for rate-limiting
     }
-
-    // If UTC time is midnight (00:00), send the list to the Discord channel
-    const utcHour = new Date().getUTCHours();
-    if (utcHour === 0) {
-      try {
-        const channelId = '1292425572433268818';
-        const channel = await client.channels.fetch(channelId);
-
-        if (channel && channel.isTextBased()) {
-          const messageChunks = [];
-
-          let chunk = `🛑 **${failedPlayers.length} Players Failed to Update for leaderboard**\n`;
-          for (const line of failedUpdateLogs) {
-            if ((chunk + line + '\n').length > 1900) {
-              messageChunks.push(chunk);
-              chunk = '';
-            }
-            chunk += line + '\n';
-          }
-          if (chunk.length) messageChunks.push(chunk);
-
-          for (const msg of messageChunks) {
-            await channel.send(msg);
-          }
-        } else {
-          console.warn(`[Update] Could not send failed update list - channel not found or not text-based.`);
-        }
-      } catch (err) {
-        console.error('[Update] Error sending failed update list to Discord:', err);
-      }
-    }
-  } else {
-    console.log('[Update] No failed players to report.');
   }
+  // If UTC time is midnight (00:00), send the list to the Discord channel
+  const utcHour = new Date().getUTCHours();
+  if (utcHour === 0) {
+    try {
+      const channelId = '1292425572433268818';
+      const channel = await client.channels.fetch(channelId);
+
+      if (channel && channel.isTextBased()) {
+        const messageChunks = [];
+
+        let chunk = `🛑 **${failedPlayers.length} Players Failed to Update for leaderboard**\n`;
+        for (const line of failedUpdateLogs) {
+          if ((chunk + line + '\n').length > 1900) {
+            messageChunks.push(chunk);
+            chunk = '';
+          }
+          chunk += line + '\n';
+        }
+        if (chunk.length) messageChunks.push(chunk);
+
+        for (const msg of messageChunks) {
+          await channel.send(msg);
+        }
+      } else {
+        console.warn(`[Update] Could not send failed update list - channel not found or not text-based.`);
+      }
+    } catch (err) {
+      console.error('[Update] Error sending failed update list to Discord:', err);
+    }
+  }
+} else {
+  console.log('[Update] No failed players to report.');
+}
 }
