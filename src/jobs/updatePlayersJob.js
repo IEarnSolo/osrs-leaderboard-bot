@@ -48,8 +48,8 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
     for (const player of filteredPlayers) {
       const username = player.username;
 
-      const lastChanged = player.lastChangedAt ? parseISO(player.lastChangedAt) : null;
-      const lastUpdated = player.updatedAt ? parseISO(player.updatedAt) : null;
+      const lastChanged = typeof player.lastChangedAt === 'string' ? parseISO(player.lastChangedAt) : null;
+      const lastUpdated = typeof player.updatedAt === 'string' ? parseISO(player.updatedAt) : null;
 
       const now = new Date();
       let shouldUpdate = true;
