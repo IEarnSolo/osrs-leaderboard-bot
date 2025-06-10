@@ -60,12 +60,6 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
           ? player.updatedAt
           : null;
 
-      console.log('Raw lastChangedAt:', player.lastChangedAt);
-      console.log('Raw updatedAt:', player.updatedAt);
-      console.log('lastChangedAt type:', typeof player.lastChangedAt, player.lastChangedAt);
-      console.log('updatedAt type:', typeof player.updatedAt, player.updatedAt);
-
-
       const now = new Date();
       let shouldUpdate = true;
 
@@ -91,7 +85,11 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
       }
 
       if (!shouldUpdate) {
-        console.log(`[Update] Skipping ${username}: does not meet update frequency requirements.`);
+        console.log(
+        `[Update] Skipping ${username}: does not meet update frequency requirements.\n
+        Last changed: ${lastChanged}\n
+        Last updated: ${updatedAt}`
+        );
         continue;
       }
 
