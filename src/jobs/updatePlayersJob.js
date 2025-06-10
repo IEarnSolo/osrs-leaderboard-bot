@@ -45,7 +45,8 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
 
     for (const player of filteredPlayers) {
       const username = player.username;
-      const displayName = leaderboardNameMap.get(discordName) || player.username;
+      const normalizedUsername = username.toLowerCase().replace(/[_-]/g, ' ');
+      const displayName = leaderboardNameMap.get(normalizedUsername) || username;
 
       const lastChanged = typeof player.lastChangedAt === 'string'
         ? parseISO(player.lastChangedAt)
@@ -132,7 +133,8 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
     for (const username of failedPlayers) {
       try {
         const player = await womClient.players.getPlayerDetails(username);
-        const displayName = leaderboardNameMap.get(discordName) || player.username;
+        const normalizedUsername = username.toLowerCase().replace(/[_-]/g, ' ');
+        const displayName = leaderboardNameMap.get(normalizedUsername) || username;
         const updatedAt = player.updatedAt
           ? new Date(player.updatedAt).toLocaleString('en-US', {
               timeZone: process.env.TIMEZONE || 'UTC',
