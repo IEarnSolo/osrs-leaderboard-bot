@@ -142,7 +142,6 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
 
       await new Promise(res => setTimeout(res, 500)); // slight delay for rate-limiting
     }
-  }
   // If UTC time is midnight (00:00), send the list to the Discord channel
   const utcHour = new Date().getUTCHours();
   if (utcHour === 0) {
