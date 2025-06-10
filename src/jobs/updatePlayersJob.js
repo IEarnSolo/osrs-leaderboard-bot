@@ -85,9 +85,7 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
       }
 
       if (!shouldUpdate) {
-        console.log(`[Update] Skipping ${username} -
-        Last changed: (${formatDistanceToNow(lastChanged)} ago) |
-        Last updated: (${formatDistanceToNow(lastUpdated)} ago)`);
+        console.log(`[Update] Skipping ${username} - Last changed: (${formatDistanceToNow(lastChanged)} ago) | Last updated: (${formatDistanceToNow(lastUpdated)} ago)`);
         continue;
       }
 
