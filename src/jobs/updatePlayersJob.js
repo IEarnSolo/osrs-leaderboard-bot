@@ -1,6 +1,6 @@
 import { womClient } from '../utils/womClient.js';
 import { GuildSettings } from '../utils/database.js';
-import { parseISO, differenceInDays, differenceInWeeks, differenceInMonths, differenceInYears, formatDistanceToNow } from 'date-fns';
+import { shouldUpdatePlayer } from '../utils/shouldUpdatePlayer.js';
 import 'dotenv/config';
 
 export async function updatePlayers(client, isMidnightUpdate = false, specificGuildId = null) {
@@ -48,46 +48,8 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
       const normalizedUsername = username.toLowerCase().replace(/[_-]/g, ' ');
       const displayName = leaderboardNameMap.get(normalizedUsername) || username;
 
-      const lastChanged = typeof player.lastChangedAt === 'string'
-        ? parseISO(player.lastChangedAt)
-        : player.lastChangedAt instanceof Date
-          ? player.lastChangedAt
-          : null;
-
-      const lastUpdated = typeof player.updatedAt === 'string'
-        ? parseISO(player.updatedAt)
-        : player.updatedAt instanceof Date
-          ? player.updatedAt
-          : null;
-
-      const now = new Date();
-      let shouldUpdate = true;
-
-      if (lastChanged && lastUpdated) {
-        const yearsSinceChange = differenceInYears(now, lastChanged);
-        const monthsSinceChange = differenceInMonths(now, lastChanged);
-        const weeksSinceChange = differenceInWeeks(now, lastChanged);
-
-        const daysSinceLastUpdate = differenceInDays(now, lastUpdated);
-        const weeksSinceLastUpdate = differenceInWeeks(now, lastUpdated);
-
-        if (yearsSinceChange >= 1) {
-          shouldUpdate = weeksSinceLastUpdate >= 2;
-        } else if (monthsSinceChange >= 6) {
-          shouldUpdate = weeksSinceLastUpdate >= 1;
-        } else if (monthsSinceChange >= 1) {
-          shouldUpdate = daysSinceLastUpdate >= 5;
-        } else if (weeksSinceChange >= 1) {
-          shouldUpdate = daysSinceLastUpdate >= 1;
-        } else {
-          shouldUpdate = true;
-        }
-      }
-
-      if (!shouldUpdate) {
-        console.log(`[Update] Skipping ${displayName} - Last changed: (${formatDistanceToNow(lastChanged)} ago) | Last updated: (${formatDistanceToNow(lastUpdated)} ago)`);
-        continue;
-      }
+      const shouldUpdate = shouldUpdatePlayer(player.lastChangedAt, player.updatedAt, displayName);
+      if (!shouldUpdate) continue;
 
       console.log(`[Update] Attempting to update player: ${displayName}`);
       let success = false;
