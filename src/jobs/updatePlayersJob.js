@@ -64,7 +64,7 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
           const message = error?.response?.data?.message || error.message;
 
           if (attempt < 4) {
-            console.warn(`[Update] Failed to update player ${displayName} (Attempt ${attempt}/4). Status: ${status || 'N/A'} | Message: ${message}. Retrying in 5 seconds...`);
+            console.error(`[Update] Failed to update player ${displayName} (Attempt ${attempt}/4). Status: ${status || 'N/A'} | Message: ${message}. Retrying in 5 seconds...`);
             await new Promise(res => setTimeout(res, 5000));
           } else {
             console.error(`[Update] Failed to update player ${displayName} after 4 attempts. Status: ${status || 'N/A'} | Message: ${message}. Skipping.`);
@@ -139,7 +139,7 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
           await channel.send(msg);
         }
       } else {
-        console.warn(`[Update] Could not send failed update list - channel not found or not text-based.`);
+        console.error(`[Update] Could not send failed update list - channel not found or not text-based.`);
       }
     } catch (err) {
       console.error('[Update] Error sending failed update list to Discord:', err);
