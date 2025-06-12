@@ -93,10 +93,10 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
     const failedUpdateLogs = [];
 
     for (const username of failedPlayers) {
+      const normalizedUsername = username.toLowerCase().replace(/[_-]/g, ' ');
+      const displayName = leaderboardNameMap.get(normalizedUsername) || username;
       try {
         const player = await womClient.players.getPlayerDetails(username);
-        const normalizedUsername = username.toLowerCase().replace(/[_-]/g, ' ');
-        const displayName = leaderboardNameMap.get(normalizedUsername) || username;
         const updatedAt = player.updatedAt
           ? new Date(player.updatedAt).toLocaleString('en-US', {
               timeZone: process.env.TIMEZONE || 'UTC',
