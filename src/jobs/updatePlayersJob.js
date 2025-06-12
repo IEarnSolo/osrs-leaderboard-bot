@@ -68,7 +68,7 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
             await new Promise(res => setTimeout(res, 5000));
           } else {
             console.error(`[Update] Failed to update player ${displayName} after 4 attempts. Status: ${status || 'N/A'} | Message: ${message}. Skipping.`);
-            failedPlayers.push(username);
+            failedPlayers.push(displayName);
           }
         }
       }
@@ -94,9 +94,9 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
 
     for (const username of failedPlayers) {
       const normalizedUsername = username.toLowerCase().replace(/[_-]/g, ' ');
-      const displayName = leaderboardNameMap.get(normalizedUsername) || username;
+      const displayName = username;
       try {
-        const player = await womClient.players.getPlayerDetails(username);
+        const player = await womClient.players.getPlayerDetails(normalizedUsername);
         const updatedAt = player.updatedAt
           ? new Date(player.updatedAt).toLocaleString('en-US', {
               timeZone: process.env.TIMEZONE || 'UTC',
