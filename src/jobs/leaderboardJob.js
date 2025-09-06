@@ -1,8 +1,8 @@
-import { Period, Metric } from '@wise-old-man/utils';
-import { womClient } from '../utils/womClient.js';
-import { GuildSettings } from '../utils/database.js';
+import { Metric, Period } from '@wise-old-man/utils';
 import { EmbedBuilder } from 'discord.js';
 import 'dotenv/config';
+import { GuildSettings } from '../utils/database.js';
+import { womClient } from '../utils/womClient.js';
 
 export async function sendLeaderboardReminder(client) {
   for (const guild of client.guilds.cache.values()) {
@@ -40,11 +40,11 @@ export async function postLeaderboard(client, channel = null) {
     if (!leaderboardRole) return;
 
     try {
-      // Fetch top 40 group gains
+      // Fetch top 60 group gains
       const groupGainsResponse = await womClient.groups.getGroupGains(
         settings.groupId,
         { period: Period.DAY, metric: Metric.OVERALL },
-        { limit: 40 }
+        { limit: 60 }
       );
 
       const groupPlayers = groupGainsResponse || [];
