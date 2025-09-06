@@ -16,10 +16,19 @@
   "description": "",
   "dependencies": {
     "@wise-old-man/utils": "^3.3.11",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
     "discord.js": "^14.19.3",
     "dotenv": "^16.5.0",
     "node-cron": "^4.0.7",
     "sequelize": "^6.37.7",
     "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.29.0",
+    "eslint": "^9.29.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-node": "^11.1.0",
+    "globals": "^16.2.0"
   }
 }

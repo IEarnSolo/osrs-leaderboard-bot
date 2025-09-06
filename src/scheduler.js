@@ -14,7 +14,7 @@ export default (client) => {
 
   // Schedule leaderboard posting at 00:00 UTC
   cron.schedule('0 0 * * *', async () => {
-    await updatePlayers(client, true); // true indicates it's the 00:00 UTC update
+    await updatePlayers(client);
     await postLeaderboard(client);
   }, {
     timezone: 'UTC',
@@ -47,7 +47,7 @@ export default (client) => {
             setting.changed('lastPlayerUpdate', true);
             await setting.save();
 
-            await updatePlayers(client, false, setting.guildId);
+            await updatePlayers(client, setting.guildId);
             break; // Only update 1 guild per minute
           }
         }

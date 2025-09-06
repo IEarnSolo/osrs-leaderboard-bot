@@ -1,5 +1,5 @@
-# Node modules
 node_modules/
-
-# Environment variables
+.idea/
+.vscode/
 .env
+eslint.config.js

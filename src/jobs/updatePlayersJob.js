@@ -3,7 +3,7 @@ import { GuildSettings } from '../utils/database.js';
 import { shouldUpdatePlayer } from '../utils/shouldUpdatePlayer.js';
 import 'dotenv/config';
 
-export async function updatePlayers(client, isMidnightUpdate = false, specificGuildId = null) {
+export async function updatePlayers(client, specificGuildId = null) {
   const startTime = Date.now();
   const failedPlayers = [];
 
@@ -53,7 +53,7 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
 
       console.log(`[Update] Attempting to update player: ${displayName}`);
       let success = false;
-      for (let attempt = 1; attempt <= 4; attempt++) {
+      for (let attempt = 1; attempt <= 6; attempt++) {
         try {
           await womClient.players.updatePlayer(username);
           console.log(`[Update] Successfully updated player: ${displayName}`);
@@ -63,11 +63,11 @@ export async function updatePlayers(client, isMidnightUpdate = false, specificGu
           const status = error?.response?.status || error?.status;
           const message = error?.response?.data?.message || error.message;
 
-          if (attempt < 4) {
-            console.error(`[Update] Failed to update player ${displayName} (Attempt ${attempt}/4). Status: ${status || 'N/A'} | Message: ${message}. Retrying in 5 seconds...`);
+          if (attempt < 6) {
+            console.error(`[Update] Failed to update player ${displayName} (Attempt ${attempt}/6). Status: ${status || 'N/A'} | Message: ${message}. Retrying in 5 seconds...`);
             await new Promise(res => setTimeout(res, 5000));
           } else {
-            console.error(`[Update] Failed to update player ${displayName} after 4 attempts. Status: ${status || 'N/A'} | Message: ${message}. Skipping.`);
+            console.error(`[Update] Failed to update player ${displayName} after 6 attempts. Status: ${status || 'N/A'} | Message: ${message}. Skipping.`);
             failedPlayers.push(displayName);
           }
         }
