@@ -5,7 +5,7 @@ const timeZone = process.env.TIMEZONE || 'UTC';
 const webhookUrl = process.env.LOG_WEBHOOK_URL;
 
 const DISCORD_MAX_LENGTH = 2000;
-const BATCH_DELAY = 1000; // 1 second
+const BATCH_DELAY = 1500; // 1.5 seconds
 
 let logBuffer = [];
 let batchTimer = null;
