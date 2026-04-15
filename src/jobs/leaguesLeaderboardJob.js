@@ -1,4 +1,3 @@
-import { Metric } from '@wise-old-man/utils';
 import { EmbedBuilder } from 'discord.js';
 import { LeaguesLeaderboard } from '../utils/database.js';
 import { emojiMap, formatSkill } from '../utils/emojiCache.js';
@@ -11,7 +10,7 @@ function buildLeaguePointsEmbed(highscores) {
   try {
     const embed = new EmbedBuilder()
       .setTitle('🏆 League Points Leaderboard')
-      .setDescription('Live league standings\nUpdates every 10 minutes.')
+      .setDescription('Live league highscores\nUpdates every 10 minutes.')
       .setColor(0x0099ff)
       .setTimestamp();
 
@@ -94,7 +93,12 @@ export async function startLeagueLeaderboard(client, guild) {
   }
 
   if (!message) {
-    const embed = await buildLeaguePointsEmbed(settings.leagueGroupId);
+    const highscores = await leaguesWomClient.groups.getGroupHiscores(
+        settings.leagueGroupId,
+        'league_points'
+    );
+
+    const embed = buildLeaguePointsEmbed(highscores);
     message = await channel.send({ embeds: [embed] });
 
     settings.leaguePointsMessageId = message.id;
@@ -145,7 +149,7 @@ export async function updateLeagueLeaderboards(client) {
 
       const highscores = await leaguesWomClient.groups.getGroupHiscores(
         settings.leagueGroupId,
-        Metric.LEAGUE_POINTS
+        'league_points'
       );
 
       if (!highscores || highscores.length === 0) continue;
