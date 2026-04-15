@@ -211,7 +211,7 @@ export async function updateFirst99s(client) {
 
             const discordMessage =
             skill === 'overall'
-                ? `${player} is the first to achieve ${emoji} maxing!`
+                ? `${player} is the first to achieve ${emoji} Maxing!`
                 : `${player} achieved the first 99 in ${emoji} ${name}!`;
 
             try {
