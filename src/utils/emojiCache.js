@@ -7,3 +7,14 @@ export async function loadSkillEmojis(client) {
     emojiMap.set(emoji.name.toLowerCase(), `<:${emoji.name}:${emoji.id}>`);
   }
 }
+
+export function formatSkill(skill) {
+  const emoji = emojiMap.get(skill) || '▫️';
+
+  const name =
+    skill === 'overall'
+      ? 'Maxed Overall'
+      : skill.charAt(0).toUpperCase() + skill.slice(1);
+
+  return { emoji, name };
+}

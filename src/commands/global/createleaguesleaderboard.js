@@ -8,14 +8,20 @@ export default {
     .setDescription('Initialize leagues leaderboard systems')
     .addStringOption(option =>
       option
-        .setName('groupid')
+        .setName('group_id')
         .setDescription('Wise Old Man League Group ID')
         .setRequired(true)
     )
     .addChannelOption(option =>
       option
-        .setName('channel')
+        .setName('leaderboard_channel')
         .setDescription('Channel to post the leaderboard(s)')
+        .setRequired(true)
+    )
+    .addChannelOption(option =>
+    option
+        .setName('announcements_channel')
+        .setDescription('Channel for first 99s and Max announcements')
         .setRequired(true)
     )
     .addStringOption(option =>
@@ -35,8 +41,9 @@ export default {
     const guild = interaction.guild;
     const guildId = guild.id;
 
-    const groupId = interaction.options.getString('groupid');
-    const channel = interaction.options.getChannel('channel');
+    const groupId = interaction.options.getString('group_id');
+    const channel = interaction.options.getChannel('leaderboard_channel');
+    const announcementsChannel = interaction.options.getChannel('announcements_channel');
     const type = interaction.options.getString('type');
 
     if (!channel.isTextBased()) {
@@ -57,11 +64,13 @@ export default {
         settings = await LeaguesLeaderboard.create({
             guildId,
             leagueGroupId: groupId,
-            leagueLeaderboardChannelId: channel.id
+            leagueLeaderboardChannelId: channel.id,
+            leagueAnnouncementsChannelId: announcementsChannel.id
         });
         } else {
         settings.leagueGroupId = groupId;
         settings.leagueLeaderboardChannelId = channel.id;
+        settings.leagueAnnouncementsChannelId = announcementsChannel.id;
         }
 
         let created = [];

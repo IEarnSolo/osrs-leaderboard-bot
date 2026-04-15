@@ -49,6 +49,7 @@ const LeaguesLeaderboard = sequelize.define('LeaguesLeaderboard', {
   },
 
   leagueLeaderboardChannelId: DataTypes.STRING,
+  leagueAnnouncementsChannelId: DataTypes.STRING,
   leaguePointsMessageId: DataTypes.STRING,
   leagueFirst99MessageId: DataTypes.STRING,
 

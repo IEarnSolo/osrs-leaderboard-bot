@@ -1,7 +1,7 @@
 import { Metric } from '@wise-old-man/utils';
 import { EmbedBuilder } from 'discord.js';
 import { LeaguesLeaderboard } from '../utils/database.js';
-import { emojiMap } from '../utils/emojiCache.js';
+import { emojiMap, formatSkill } from '../utils/emojiCache.js';
 import { processLeagueAchievements } from '../utils/processLeagueAchievements.js';
 import { leaguesWomClient } from '../utils/womClient.js';
 
@@ -193,10 +193,35 @@ export async function updateFirst99s(client) {
 
       if (updates.length === 0) continue;
 
-      for (const { skill, player } of updates) {
-        settings[skill] = player;
-        console.log(`[Leagues] ${player} achieved first 99 in ${skill}`);
-      }
+      const announcementsChannel = settings.leagueAnnouncementsChannelId
+        ? await client.channels.fetch(settings.leagueAnnouncementsChannelId)
+        : null;
+
+        for (const { skill, player } of updates) {
+            settings[skill] = player;
+
+            const { emoji, name } = formatSkill(skill);
+
+            const logMessage =
+            skill === 'overall'
+                ? `${player} is the first to achieve maxing`
+                : `${player} achieved first 99 in ${name}`;
+
+            console.log(`[Leagues] ${logMessage}`);
+
+            const discordMessage =
+            skill === 'overall'
+                ? `${player} is the first to achieve ${emoji} maxing!`
+                : `${player} achieved the first 99 in ${emoji} ${name}!`;
+
+            try {
+                if (announcementsChannel?.isTextBased()) {
+                await announcementsChannel.send(discordMessage);
+                }
+            } catch (err) {
+                console.error(`[Leagues] Failed to send announcement:`, err);
+            }
+        }
 
       await settings.save();
 
