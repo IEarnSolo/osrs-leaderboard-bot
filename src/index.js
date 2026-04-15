@@ -1,11 +1,12 @@
+import { Collection } from 'discord.js';
 import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
-import { Collection } from 'discord.js';
-import { sequelize } from './utils/database.js';
-import scheduler from './scheduler.js';
+import { fileURLToPath, pathToFileURL } from 'url';
 import client from './config/client.js';
+import scheduler from './scheduler.js';
+import { sequelize } from './utils/database.js';
+import { loadSkillEmojis } from './utils/emojiCache.js';
 import './utils/logger.js';
 
 // Fix for __dirname in ESM
@@ -22,7 +23,9 @@ for (const folder of commandFolders) {
   const commandFiles = fs.readdirSync(folderPath).filter(file => file.endsWith('.js'));
 
   for (const file of commandFiles) {
-    const { default: command } = await import(path.join(folderPath, file));
+    const filePath = path.join(folderPath, file);
+    const { default: command } = await import(pathToFileURL(filePath).href);
+
     if (command && command.data && command.data.name) {
       client.commands.set(command.data.name, command);
     }
@@ -31,6 +34,7 @@ for (const folder of commandFolders) {
 
 client.once('ready', async () => {
   console.log(`Logged in as ${client.user.tag}`);
+  await loadSkillEmojis(client);
   await sequelize.sync();
   scheduler(client);
 });

@@ -1,7 +1,7 @@
 import cron from 'node-cron';
+import { postLeaderboard, sendLeaderboardReminder } from './jobs/leaderboardJob.js';
+import { updateFirst99s, updateLeagueLeaderboards } from './jobs/leaguesLeaderboardJob.js';
 import { updatePlayers } from './jobs/updatePlayersJob.js';
-import { sendLeaderboardReminder } from './jobs/leaderboardJob.js';
-import { postLeaderboard } from './jobs/leaderboardJob.js';
 import { GuildSettings } from './utils/database.js';
 
 export default (client) => {
@@ -56,5 +56,15 @@ export default (client) => {
       } finally {
         isUpdating = false;
       }
+    });
+
+    cron.schedule('*/10 * * * *', async () => {
+      await updateLeagueLeaderboards(client);
+    }, {
+      timezone: 'UTC'
+    });
+
+    cron.schedule('*/10 * * * *', async () => {
+      await updateFirst99s(client);
     });
 };

@@ -15,7 +15,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@wise-old-man/utils": "^3.3.11",
+    "@wise-old-man/utils": "^4.0.14",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "discord.js": "^14.19.3",

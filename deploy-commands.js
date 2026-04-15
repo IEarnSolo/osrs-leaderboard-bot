@@ -1,8 +1,8 @@
+import { REST, Routes } from 'discord.js';
 import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
-import { REST, Routes } from 'discord.js';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 // Fix __dirname for ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -28,7 +28,9 @@ if (!isClear) {
   const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
   for (const file of commandFiles) {
-    const { default: command } = await import(path.join(commandsPath, file));
+    const filePath = path.join(commandsPath, file);
+    const { default: command } = await import(pathToFileURL(filePath).href);
+    
     if (command && command.data) {
       commands.push(command.data.toJSON());
     }

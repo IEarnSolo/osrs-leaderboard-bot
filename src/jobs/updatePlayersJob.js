@@ -1,7 +1,7 @@
-import { womClient } from '../utils/womClient.js';
+import 'dotenv/config';
 import { GuildSettings } from '../utils/database.js';
 import { shouldUpdatePlayer } from '../utils/shouldUpdatePlayer.js';
-import 'dotenv/config';
+import { womClient } from '../utils/womClient.js';
 
 export async function updatePlayers(client, specificGuildId = null) {
   const startTime = Date.now();
@@ -21,7 +21,6 @@ export async function updatePlayers(client, specificGuildId = null) {
     const leaderboardRole = guild.roles.cache.find(role => role.name === 'Leaderboard');
     if (!leaderboardRole) continue;
 
-    // Fetch group details from WOM
     let groupPlayers = [];
     try {
       const groupDetails = await womClient.groups.getGroupDetails(settings.groupId);
