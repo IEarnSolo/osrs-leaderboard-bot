@@ -5,11 +5,14 @@ import { processLeagueAchievements } from '../utils/processLeagueAchievements.js
 import { leaguesWomClient } from '../utils/womClient.js';
 
 const leaderboardCache = new Map();
+const GROUP_BASE_URL = 'https://league.wiseoldman.net/groups/';
+const PLAYER_BASE_URL = 'https://league.wiseoldman.net/players/';
 
-function buildLeaguePointsEmbed(highscores) {
+function buildLeaguePointsEmbed(highscores, groupId) {
   try {
     const embed = new EmbedBuilder()
       .setTitle('🏆 League Points Leaderboard')
+      .setURL(`${GROUP_BASE_URL}${groupId}`) // 🔗 Title link
       .setDescription('Live league highscores\nUpdates every 10 minutes.')
       .setColor(0x0099ff)
       .setTimestamp();
@@ -19,13 +22,20 @@ function buildLeaguePointsEmbed(highscores) {
       const { score, rank } = entry.data;
       const percentile = Math.round(entry.player.leaguePercentile * 100);
 
+      // 🔗 Encode player name for URL safety
+      const encodedName = encodeURIComponent(displayName);
+
+      // 🔗 Clickable player name
+      const playerLink = `[${displayName}](${PLAYER_BASE_URL}${encodedName})`;
+
       embed.addFields({
-        name: `#${index + 1} - ${displayName}`,
+        name: ` `,
         value:
-          `**Points:** ${score.toLocaleString()}\n` +
-          `**Rank:** ${rank.toLocaleString()}\n` +
-          `**Percentile:** Top ${percentile}%`,
-        inline: false,
+        `**#${index + 1} ${playerLink}**\n` +
+        `Points: ${score.toLocaleString()}\n` +
+        `Rank: ${rank.toLocaleString()}\n` +
+        `Top ${percentile}%`,
+                inline: false,
       });
     });
 
@@ -98,7 +108,7 @@ export async function startLeagueLeaderboard(client, guild) {
         'league_points'
     );
 
-    const embed = buildLeaguePointsEmbed(highscores);
+    const embed = buildLeaguePointsEmbed(highscores, settings.leagueGroupId);
     message = await channel.send({ embeds: [embed] });
 
     settings.leaguePointsMessageId = message.id;
@@ -166,7 +176,7 @@ export async function updateLeagueLeaderboards(client) {
         continue;
       }
 
-      const embed = buildLeaguePointsEmbed(highscores);
+      const embed = buildLeaguePointsEmbed(highscores, settings.leagueGroupId);
 
       await message.edit({ embeds: [embed] });
 
