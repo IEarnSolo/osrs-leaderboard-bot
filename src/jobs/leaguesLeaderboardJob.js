@@ -31,7 +31,7 @@ function buildLeaguePointsEmbed(highscores, groupId) {
       embed.addFields({
         name: ` `,
         value:
-        `**#${index + 1} ${playerLink}**\n` +
+        `**#${index + 1} - ${playerLink}**\n` +
         `Points: ${score.toLocaleString()}\n` +
         `Rank: ${rank.toLocaleString()}\n` +
         `Top ${percentile}%`,
