@@ -1,8 +1,8 @@
 export function processLeagueAchievements(achievements, settings) {
-  const bestBySkill = new Map();
-
+  const achievementsBySkill = new Map();
   const playerCounts = {};
 
+  // 🧠 Step 1: Count existing 99s (excluding overall)
   for (const [key, value] of Object.entries(settings.dataValues)) {
     if (!value) continue;
     if (key === 'overall') continue;
@@ -10,8 +10,9 @@ export function processLeagueAchievements(achievements, settings) {
     playerCounts[value] = (playerCounts[value] || 0) + 1;
   }
 
+  // 🧠 Step 2: Group ALL valid achievements by skill
   for (const achievement of achievements) {
-    const { name, metric, createdAt } = achievement;
+    const { name, metric } = achievement;
 
     const skill = metric?.toLowerCase();
     if (!skill) continue;
@@ -22,38 +23,43 @@ export function processLeagueAchievements(achievements, settings) {
 
     if (settings[skill]) continue;
 
-    const existing = bestBySkill.get(skill);
-
-    if (!existing || new Date(createdAt) < new Date(existing.createdAt)) {
-      bestBySkill.set(skill, achievement);
+    if (!achievementsBySkill.has(skill)) {
+      achievementsBySkill.set(skill, []);
     }
+
+    achievementsBySkill.get(skill).push(achievement);
   }
 
   const updates = [];
 
-    const sorted = Array.from(bestBySkill.entries())
-        .sort((a, b) => new Date(a[1].createdAt) - new Date(b[1].createdAt));
+  // 🧠 Step 3: Process each skill independently
+  for (const [skill, list] of achievementsBySkill.entries()) {
+    // Sort earliest → latest
+    list.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
-    for (const [skill, achievement] of sorted) {
-    const playerName = achievement.player.displayName;
+    for (const achievement of list) {
+      const playerName = achievement.player.displayName;
+      const isOverall = skill === 'overall';
 
-    const isOverall = skill === 'overall';
+      if (!isOverall) {
+        const count = playerCounts[playerName] || 0;
 
-    if (!isOverall) {
-      const count = playerCounts[playerName] || 0;
+        if (count >= 2) {
+          console.log(`[Leagues] Skipping ${playerName} for ${skill} (already has 2 skills)`);
+          continue; // 👉 try NEXT player
+        }
 
-      if (count >= 2) {
-        console.log(`[Leagues] Skipping ${playerName} for ${skill} (already has 2 skills)`);
-        continue;
+        playerCounts[playerName] = count + 1;
       }
 
-      playerCounts[playerName] = count + 1;
-    }
+      // ✅ First valid player wins
+      updates.push({
+        skill,
+        player: playerName
+      });
 
-    updates.push({
-      skill,
-      player: playerName
-    });
+      break; // 👉 stop after first valid player
+    }
   }
 
   return updates;
