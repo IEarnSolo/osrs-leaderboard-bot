@@ -57,7 +57,7 @@ function buildFirst99Embed(settings) {
     'overall','attack','defence','strength','hitpoints','ranged','prayer','magic',
     'cooking','woodcutting','fletching','fishing','firemaking','crafting','smithing',
     'mining','herblore','agility','thieving','slayer','farming','runecrafting',
-    'hunter','construction','sailing'
+    'hunter','construction'/* ,'sailing' */
   ];
 
   const lines = skills.map(skill => {
@@ -202,6 +202,38 @@ export async function updateFirst99s(client) {
         settings.leagueGroupId,
         { limit: 50 }
       );
+
+        // TEMP: Fetch overall hiscores for max detection
+        const hiscores = await leaguesWomClient.groups.getGroupHiscores(
+        settings.leagueGroupId,
+        'overall',
+        { limit: 50 }
+        );
+
+        // TEMP MAX DETECTION (REMOVE WHEN SAILING EXISTS AGAIN)
+        if (!settings.overall && hiscores?.length) {
+        const maxedPlayers = hiscores
+            .filter(p => p.data?.level >= 2277);
+
+        console.log(`[Leagues][TEMP] Found ${maxedPlayers.length} potential maxed players`);
+
+            if (maxedPlayers.length > 0) {
+                const firstMax = maxedPlayers[0];
+
+                console.log(
+                `[Leagues][TEMP] Injecting max for ${firstMax.player.displayName} (lvl: ${firstMax.data.level})`
+                );
+
+                achievements.push({
+                name: 'Maxed Overall',
+                metric: 'overall',
+                createdAt: firstMax.player.updatedAt || new Date().toISOString(),
+                player: {
+                    displayName: firstMax.player.displayName
+                }
+                });
+            }
+        }
 
       const updates = processLeagueAchievements(achievements, settings);
 
