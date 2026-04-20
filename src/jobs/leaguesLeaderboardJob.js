@@ -190,6 +190,26 @@ export async function updateLeagueLeaderboards(client) {
   }
 }
 
+async function fetchAllAchievements(groupId, limit = 200) {
+  const pageSize = 50;
+  const results = [];
+
+  for (let offset = 0; offset < limit; offset += pageSize) {
+    const batch = await leaguesWomClient.groups.getGroupAchievements(groupId, {
+      limit: pageSize,
+      offset
+    });
+
+    if (!batch || batch.length === 0) break;
+
+    results.push(...batch);
+
+    if (batch.length < pageSize) break;
+  }
+
+  return results;
+}
+
 export async function updateFirst99s(client) {
   const all = await LeaguesLeaderboard.findAll();
 
@@ -198,10 +218,7 @@ export async function updateFirst99s(client) {
     if (!settings.leagueGroupId || !settings.leagueLeaderboardChannelId) continue;
 
     try {
-      const achievements = await leaguesWomClient.groups.getGroupAchievements(
-        settings.leagueGroupId,
-        { limit: 50 }
-      );
+      const achievements = await fetchAllAchievements(settings.leagueGroupId, 200);
 
         // TEMP: Fetch overall hiscores for max detection
         const hiscores = await leaguesWomClient.groups.getGroupHiscores(
